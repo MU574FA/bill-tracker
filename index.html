@@ -34,12 +34,63 @@
             }
         }
 
+        .payment-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+        }
+
+        .payment-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .payment-group {
+                grid-template-columns: auto 150px;
+            }
+        }
+
+        .payment-info {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .payment-info {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .amount-box {
+            padding: 10px;
+            border-radius: 4px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .total {
+            background-color: #e8f5e9;
+        }
+
+        .paid {
+            background-color: #e3f2fd;
+        }
+
+        .remaining {
+            background-color: #fce4ec;
+        }
+
         input {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
-            width: calc(100% - 18px); /* Account for padding and border */
+            width: calc(100% - 18px);
         }
 
         button {
@@ -128,16 +179,6 @@
             }
         }
 
-        .total {
-            margin-top: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-align: right;
-            padding: 10px;
-            background-color: #e8f5e9;
-            border-radius: 4px;
-        }
-
         .error {
             color: #f44336;
             font-size: 0.9em;
@@ -155,7 +196,6 @@
             }
         }
 
-        /* Headers for desktop view */
         .headers {
             display: none;
         }
@@ -196,18 +236,39 @@
             </div>
             <div id="itemsList"></div>
         </div>
-        <div class="total" id="total">Total: $0.00</div>
+
+        <div class="payment-section">
+            <div class="payment-group">
+                <input type="number" id="paidAmount" placeholder="Enter amount paid" step="0.01" min="0" oninput="updatePayment()">
+            </div>
+            
+            <div class="payment-info">
+                <div class="amount-box total" id="total">Total: $0.00</div>
+                <div class="amount-box paid" id="paid">Paid: $0.00</div>
+                <div class="amount-box remaining" id="remaining">Remaining: $0.00</div>
+            </div>
+        </div>
     </div>
 
     <script>
         let items = [];
         let editingIndex = -1;
+        let currentTotal = 0;
 
         function formatNumber(num) {
             return num.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
+        }
+
+        function updatePayment() {
+            const paidInput = document.getElementById('paidAmount');
+            const paidAmount = parseFloat(paidInput.value) || 0;
+            const remaining = currentTotal - paidAmount;
+
+            document.getElementById('paid').textContent = `Paid: $${formatNumber(paidAmount)}`;
+            document.getElementById('remaining').textContent = `Remaining: $${formatNumber(remaining)}`;
         }
 
         function addItem() {
@@ -220,7 +281,6 @@
             const quantity = parseFloat(quantityInput.value);
             const price = parseFloat(priceInput.value);
 
-            // Validation
             if (!name || !quantity || !price) {
                 errorDiv.textContent = 'Please fill in all fields';
                 return;
@@ -247,7 +307,6 @@
                 items.push(item);
             }
 
-            // Clear inputs
             nameInput.value = '';
             quantityInput.value = '';
             priceInput.value = '';
@@ -273,13 +332,12 @@
             const totalDiv = document.getElementById('total');
             
             itemsList.innerHTML = '';
-            let grandTotal = 0;
+            currentTotal = 0;
 
             items.forEach((item, index) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'item';
                 
-                // Different layout for mobile and desktop
                 itemDiv.innerHTML = `
                     <div><span class="item-header">Item: </span>${item.name}</div>
                     <div class="number"><span class="item-header">Quantity: </span>${formatNumber(item.quantity)}</div>
@@ -291,10 +349,11 @@
                     </div>
                 `;
                 itemsList.appendChild(itemDiv);
-                grandTotal += item.total;
+                currentTotal += item.total;
             });
 
-            totalDiv.textContent = `Total: $${formatNumber(grandTotal)}`;
+            totalDiv.textContent = `Total: $${formatNumber(currentTotal)}`;
+            updatePayment(); // Update payment calculations when items change
         }
     </script>
 </body>
