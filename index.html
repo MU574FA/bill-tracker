@@ -18,13 +18,20 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: calc(100% - 40px);
         }
 
         .input-group {
             display: grid;
-            grid-template-columns: 1fr 120px 120px auto;
+            grid-template-columns: 1fr;
             gap: 10px;
             margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .input-group {
+                grid-template-columns: 1fr 120px 120px auto;
+            }
         }
 
         input {
@@ -32,6 +39,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            width: calc(100% - 18px); /* Account for padding and border */
         }
 
         button {
@@ -42,6 +50,13 @@
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            button {
+                width: auto;
+            }
         }
 
         button:hover {
@@ -66,20 +81,51 @@
 
         .items-list {
             margin-top: 20px;
+            overflow-x: auto;
         }
 
         .item {
             display: grid;
-            grid-template-columns: 1fr 120px 120px 120px 180px;
-            gap: 10px;
-            padding: 10px;
+            grid-template-columns: 1fr;
+            gap: 5px;
+            padding: 15px;
             border-bottom: 1px solid #eee;
-            align-items: center;
+            background-color: #f8f8f8;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        @media (min-width: 768px) {
+            .item {
+                grid-template-columns: 1fr 120px 120px 120px 180px;
+                background-color: transparent;
+                margin-bottom: 0;
+                gap: 10px;
+            }
+        }
+
+        .item-header {
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        @media (min-width: 768px) {
+            .item-header {
+                display: none;
+            }
         }
 
         .button-group {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 5px;
+        }
+
+        @media (min-width: 768px) {
+            .button-group {
+                display: flex;
+            }
         }
 
         .total {
@@ -101,6 +147,33 @@
         .number {
             text-align: right;
         }
+
+        @media (max-width: 767px) {
+            .number {
+                text-align: left;
+                display: inline;
+            }
+        }
+
+        /* Headers for desktop view */
+        .headers {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .headers {
+                display: grid;
+                grid-template-columns: 1fr 120px 120px 120px 180px;
+                gap: 10px;
+                padding: 10px;
+                font-weight: bold;
+                border-bottom: 2px solid #ddd;
+            }
+
+            .headers .number {
+                text-align: right;
+            }
+        }
     </style>
 </head>
 <body>
@@ -113,7 +186,16 @@
             <button onclick="addItem()">Add Item</button>
         </div>
         <div id="error" class="error"></div>
-        <div class="items-list" id="itemsList"></div>
+        <div class="items-list">
+            <div class="headers">
+                <div>Item</div>
+                <div class="number">Quantity</div>
+                <div class="number">Price</div>
+                <div class="number">Total</div>
+                <div>Actions</div>
+            </div>
+            <div id="itemsList"></div>
+        </div>
         <div class="total" id="total">Total: $0.00</div>
     </div>
 
@@ -196,11 +278,13 @@
             items.forEach((item, index) => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'item';
+                
+                // Different layout for mobile and desktop
                 itemDiv.innerHTML = `
-                    <div>${item.name}</div>
-                    <div class="number">${formatNumber(item.quantity)}</div>
-                    <div class="number">$${formatNumber(item.price)}</div>
-                    <div class="number">$${formatNumber(item.total)}</div>
+                    <div><span class="item-header">Item: </span>${item.name}</div>
+                    <div class="number"><span class="item-header">Quantity: </span>${formatNumber(item.quantity)}</div>
+                    <div class="number"><span class="item-header">Price: </span>$${formatNumber(item.price)}</div>
+                    <div class="number"><span class="item-header">Total: </span>$${formatNumber(item.total)}</div>
                     <div class="button-group">
                         <button class="edit" onclick="editItem(${index})">Edit</button>
                         <button class="remove" onclick="removeItem(${index})">Remove</button>
